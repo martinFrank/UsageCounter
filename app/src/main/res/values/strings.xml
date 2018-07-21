@@ -1,0 +1,12 @@
+<resources>
+
+    <string name="app_name">UsageCounter</string>
+    <string name="button_new">new</string>
+    <string name="button_delete">delete</string>
+    <string name="button_update">update</string>
+    <string name="button_inc">+</string>
+    <string name="button_dec">-</string>
+    <string name="label_desc">description:</string>
+    <string name="label_counter">counter:</string>
+
+</resources>
