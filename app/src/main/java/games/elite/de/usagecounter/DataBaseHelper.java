@@ -15,7 +15,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
-            db.execSQL(UsageCounterDatabaseAdapter.DATABASE_CREATE);
+            db.execSQL(DatabaseAdapter.DATABASE_CREATE_COUNTER);
+            db.execSQL(DatabaseAdapter.DATABASE_CREATE_TIMESTAMPS);
         }catch(Exception e){
             Log.e("DataBaseHelper.onCreate",e.toString());
         }

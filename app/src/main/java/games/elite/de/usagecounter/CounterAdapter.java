@@ -11,16 +11,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 class CounterAdapter extends RecyclerView.Adapter<CounterAdapter.CounterViewHolder> {
 
-    private final List<Counter> counters;
+    private enum PushType {INCREASE, DECREASE}
 
-    public CounterAdapter(List<Counter> counters) {
+    private final List<Counter> counters;
+    private final DbHook dbHook;
+
+    CounterAdapter(List<Counter> counters, DbHook dbHook) {
         super();
         this.counters = counters;
+        this.dbHook = dbHook;
     }
 
     @NonNull
@@ -37,30 +40,49 @@ class CounterAdapter extends RecyclerView.Adapter<CounterAdapter.CounterViewHold
         holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Intent intent = new Intent(v.getContext(), DetailActivity.class);
-                intent.putExtra(MainActivity.EXTRA_INDEX, counter.getId());
-                intent.putExtra(MainActivity.EXTRA_TEXT, counter.getText());
-                intent.putExtra(MainActivity.EXTRA_COUNT, counter.getCount());
-                ((Activity) v.getContext()).startActivityForResult(intent, 0, null);
-                return true;
+                Activity activity = ((Activity) v.getContext());
+                return openEditorActivity(activity, counter);
             }
         });
-        holder.addButton.setOnClickListener(new View.OnClickListener() {
+        holder.increaseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                counter.add();
-                holder.textView.setText(counter.getFormatted());
+                handleButtonPushEvent(PushType.INCREASE, counter, holder.textView);
             }
         });
 
-        holder.removeButton.setOnClickListener(new View.OnClickListener() {
+        holder.decreaseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                counter.remove();
-                holder.textView.setText(counter.getFormatted());
+                handleButtonPushEvent(PushType.DECREASE, counter, holder.textView);
             }
         });
         holder.textView.setText(counter.getFormatted());
+    }
+
+    private void handleButtonPushEvent(PushType eventType, Counter counter, TextView textView) {
+        int delta = 0;
+        switch (eventType) {
+            case DECREASE: {
+                delta = counter.decrease();
+                break;
+            }
+            case INCREASE: {
+                delta = counter.increase();
+                break;
+            }
+        }
+        dbHook.addTimeStamp(counter.getId(), delta);
+        textView.setText(counter.getFormatted());
+    }
+
+    private boolean openEditorActivity(Activity activity, Counter counter) {
+        Intent intent = new Intent(activity, DetailActivity.class);
+        intent.putExtra(MainActivity.EXTRA_ID, counter.getId());
+        intent.putExtra(MainActivity.EXTRA_TEXT, counter.getText());
+        intent.putExtra(MainActivity.EXTRA_COUNT, counter.getCount());
+        activity.startActivityForResult(intent, 0, null);
+        return true;
     }
 
 
@@ -69,17 +91,17 @@ class CounterAdapter extends RecyclerView.Adapter<CounterAdapter.CounterViewHold
         return counters.size();
     }
 
-    public class CounterViewHolder extends RecyclerView.ViewHolder {
+    class CounterViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView textView;
-        private final Button addButton;
-        private final Button removeButton;
+        private final Button increaseButton;
+        private final Button decreaseButton;
 
-        public CounterViewHolder(View itemView) {
+        CounterViewHolder(View itemView) {
             super(itemView);
-            textView = itemView.findViewById(R.id.usage_text);
-            addButton = itemView.findViewById(R.id.usage_add);
-            removeButton = itemView.findViewById(R.id.usage_remove);
+            textView = itemView.findViewById(R.id.counter_text);
+            increaseButton = itemView.findViewById(R.id.button_increase_count);
+            decreaseButton = itemView.findViewById(R.id.button_decrease_count);
         }
     }
 }

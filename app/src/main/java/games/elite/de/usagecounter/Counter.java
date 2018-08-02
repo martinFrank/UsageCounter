@@ -4,18 +4,30 @@ import java.text.MessageFormat;
 
 public class Counter {
 
-    private int count;
-    private Integer id;
+    private int id;
     private String text;
+    private int count;
 
-    public void add() {
-        //FIXME date
-        count = count + 1;
+    Counter(int id, String text, int count){
+        this(text, count);
+        this.id = id;
     }
 
-    public void remove() {
-        //FIXME date
-        count = count - 1;
+    Counter(String text, int count){
+        this.text = text;
+        this.count = count;
+    }
+
+    public int increase() {
+        int delta = + 1;
+        count = count + delta;
+        return delta;
+    }
+
+    public int decrease() {
+        int delta = - 1;
+        count = count + delta;
+        return delta;
     }
 
     public int getId() {
